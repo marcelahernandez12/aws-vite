@@ -4,6 +4,10 @@ trigger:
 pool:
   vmImage: 'ubuntu-latest'
 
+variables:
+  awsRegion: 'us-east-2'         # cámbialo por tu región
+  s3BucketName: 'mi-sitio-web-vite'   # cámbialo por el nombre de tu bucket
+
 steps:
 - task: UseNode@1
   inputs:
@@ -15,13 +19,11 @@ steps:
     npm run build
   displayName: 'npm install and build'
 
-- task: AWS.aws-toolkit-for-azure-devops.aws-s3-upload.AWS.S3Upload@1
-  displayName: 'Deploy to S3 Bucket'
-  inputs:
-    awsCredentials: '$(awsCredentials)'
-    regionName: '$(awsRegion)'
-    bucketName: '$(s3BucketName)'
-    sourceFolder: '$(System.DefaultWorkingDirectory)/dist'
-    s3UploadDirectory: ''
-    globExpressions: '**'
-    additionalArguments: '--acl public-read'
+- script: |
+    python3 -m pip install --upgrade pip
+    pip install awscli
+    aws s3 sync "$(System.DefaultWorkingDirectory)/dist" "s3://$(s3BucketName)" --region $(awsRegion) --acl public-read
+  displayName: 'Deploy to S3 with AWS CLI'
+  env:
+    AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
+    AWS_SECRET_ACCESS_KEY: $(AWS_SECRET_ACCESS_KEY)
