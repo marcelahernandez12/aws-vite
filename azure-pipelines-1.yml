@@ -1,0 +1,29 @@
+trigger:
+- master
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  awsRegion: 'us-east-2'         # cámbialo por tu región
+  s3BucketName: 'mi-sitio-web-vite'   # cámbialo por el nombre de tu bucket
+
+steps:
+- task: UseNode@1
+  inputs:
+    versionSpec: '18.x'
+  displayName: 'Install Node.js'
+
+- script: |
+    npm install
+    npm run build
+  displayName: 'npm install and build'
+
+- script: |
+    python3 -m pip install --upgrade pip
+    pip install awscli
+    aws s3 sync "$(System.DefaultWorkingDirectory)/dist" "s3://$(s3BucketName)" --region $(awsRegion) --acl public-read
+  displayName: 'Deploy to S3 with AWS CLI'
+  env:
+    AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
+    AWS_SECRET_ACCESS_KEY: $(AWS_SECRET_ACCESS_KEY)
