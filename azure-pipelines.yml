@@ -1,0 +1,27 @@
+trigger:
+- main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+- task: UseNode@1
+  inputs:
+    versionSpec: '18.x'
+  displayName: 'Install Node.js'
+
+- script: |
+    npm install
+    npm run build
+  displayName: 'npm install and build'
+
+- task: AWS.aws-toolkit-for-azure-devops.aws-s3-upload.AWS.S3Upload@1
+  displayName: 'Deploy to S3 Bucket'
+  inputs:
+    awsCredentials: '$(awsCredentials)'
+    regionName: '$(awsRegion)'
+    bucketName: '$(s3BucketName)'
+    sourceFolder: '$(System.DefaultWorkingDirectory)/dist'
+    s3UploadDirectory: ''
+    globExpressions: '**'
+    additionalArguments: '--acl public-read'
