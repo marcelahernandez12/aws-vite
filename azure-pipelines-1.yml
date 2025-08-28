@@ -2,7 +2,7 @@ trigger:
 - master
 
 pool:
-  vmImage: 'ubuntu-latest'
+  name: 'new agent pool'
 
 variables:
   awsRegion: 'us-east-2'         # cámbialo por tu región
