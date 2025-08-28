@@ -17,13 +17,11 @@ steps:
 - script: |
     npm install
     npm run build
-  displayName: 'npm install and build'
-
-- script: |
+    
     python3 -m pip install --upgrade pip
     pip install awscli
     aws s3 sync "$(System.DefaultWorkingDirectory)/dist" "s3://$(s3BucketName)" --region $(awsRegion) --acl public-read
-  displayName: 'Deploy to S3 with AWS CLI'
+  displayName: 'Build and Deploy to S3 with AWS CLI'
   env:
     AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
     AWS_SECRET_ACCESS_KEY: $(AWS_SECRET_ACCESS_KEY)
